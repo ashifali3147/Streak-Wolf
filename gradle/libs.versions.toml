@@ -9,9 +9,12 @@ lifecycleRuntimeKtx = "2.6.1"
 activityCompose = "1.8.0"
 kotlin = "2.2.10"
 composeBom = "2026.02.01"
+room3Runtime = "3.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-room3-compiler = { module = "androidx.room3:room3-compiler", version.ref = "room3Runtime" }
+androidx-room3-runtime = { module = "androidx.room3:room3-runtime", version.ref = "room3Runtime" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
