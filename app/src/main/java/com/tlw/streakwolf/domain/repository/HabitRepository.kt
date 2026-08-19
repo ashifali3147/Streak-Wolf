@@ -7,7 +7,7 @@ import java.time.LocalDate
 interface HabitRepository {
     suspend fun createNewHabit(habit: Habit)
 
-    suspend fun deleteHabit(habitId: Long)
+    suspend fun deleteHabit(habit: Habit)
 
     suspend fun archiveHabit(habitId: Long)
 
