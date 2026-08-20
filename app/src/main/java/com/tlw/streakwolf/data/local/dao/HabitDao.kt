@@ -19,6 +19,9 @@ interface HabitDao {
     @Delete
     suspend fun deleteHabit(habit: HabitEntity)
 
+    @Query("UPDATE ${StreakWolfDatabase.HABIT_TABLE} SET archived = :value WHERE id = :id")
+    suspend fun updateArchive(id: Long, value: Boolean)
+
     @Query("SELECT * FROM ${StreakWolfDatabase.HABIT_TABLE} WHERE archived = 0 ORDER BY sortOrder")
     fun getAllHabit(): Flow<List<HabitEntity>>
 
