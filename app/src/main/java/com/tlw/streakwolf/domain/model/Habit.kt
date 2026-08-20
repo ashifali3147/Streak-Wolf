@@ -3,7 +3,7 @@ package com.tlw.streakwolf.domain.model
 import java.time.LocalDate
 
 data class Habit(
-    val id: Long,
+    val id: Long = 0,
     val name: String,
     val color: HabitColor,
     val createdAt: LocalDate,
