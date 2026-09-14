@@ -36,6 +36,7 @@ import com.tlw.streakwolf.ui.addedit.AddHabitSheet
 import com.tlw.streakwolf.ui.components.EmptyState
 import com.tlw.streakwolf.ui.components.HabitCard
 import com.tlw.streakwolf.ui.components.HabitListSkeleton
+import com.tlw.streakwolf.ui.components.PackStreakCardSkeleton
 import com.tlw.streakwolf.ui.theme.HairlineWidth
 import com.tlw.streakwolf.ui.theme.StreakWolfTheme
 import com.tlw.streakwolf.ui.theme.caption
@@ -142,7 +143,10 @@ private fun HomeContent(
 
                 is HomeUiState.Empty -> EmptyState(title = "No habits yet", message = "Tap New habit to start your first streak.",)
 
-                is HomeUiState.Loading -> HabitListSkeleton()
+                is HomeUiState.Loading -> {
+                    PackStreakCardSkeleton()
+                    HabitListSkeleton()
+                }
             }
             // Clears the FAB.
             Box(Modifier.size(56.dp))
@@ -223,6 +227,14 @@ private val previewState = HomeUiState.Content(
     packStreak = 18,
     bestPackStreak = 41
 )
+
+@Preview(name = "Home · loading")
+@Composable
+private fun HomeScreenLoadingPreview() {
+    StreakWolfTheme(darkTheme = true) {
+        HomeContent(onAddClick = {}, state = HomeUiState.Loading(LocalDate.of(2026, 8, 15)))
+    }
+}
 
 @Preview(name = "Home · dark")
 @Composable

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -110,6 +111,47 @@ private fun HabitCardSkeleton(
                     .clip(CircleShape)
                     .background(brush)
             )
+        }
+    }
+}
+
+/**
+ * Placeholder shaped like the home screen's pack streak card. Lives here rather than next
+ * to that card so it can share [Bar] and [placeholderBrush] with the row skeleton. The
+ * 80.dp ring sets the card's height, so matching it is what keeps the list from jumping.
+ */
+@Composable
+fun PackStreakCardSkeleton(
+    modifier: Modifier = Modifier,
+    shimmer: Boolean = false,
+) {
+    val brush = placeholderBrush(shimmer)
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        border = BorderStroke(HairlineWidth, MaterialTheme.colorScheme.outline),
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // The progress ring, drawn as an empty track.
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .border(4.dp, brush, CircleShape)
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                // "Pack streak" label, "18 days" headline, "Best 41" caption.
+                Bar(width = 72.dp, height = 12.dp, brush = brush)
+                Bar(width = 112.dp, height = 24.dp, brush = brush)
+                Bar(width = 48.dp, height = 10.dp, brush = brush)
+            }
         }
     }
 }
