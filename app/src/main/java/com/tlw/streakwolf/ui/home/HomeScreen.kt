@@ -22,10 +22,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tlw.streakwolf.ui.addedit.AddHabitSheet
 import com.tlw.streakwolf.ui.components.HabitCard
 import com.tlw.streakwolf.ui.theme.HairlineWidth
 import com.tlw.streakwolf.ui.theme.StreakWolfTheme
@@ -49,15 +56,46 @@ private val fakeHabits = listOf(
     FakeHabit("Stretch", 12, listOf(true, true, false, true, true, true, true), false),
 )
 
+/**
+ * Stateful half: owns the ViewModel and the add-sheet visibility, renders nothing itself.
+ * Keeping it separate is what lets [HomeContent]'s previews run without a Hilt graph.
+ */
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = hiltViewModel(),
+) {
+    // TODO(step 6): feed this into HomeContent and delete fakeHabits.
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Saveable so the sheet survives rotation and process death.
+    var showAddSheet by rememberSaveable { mutableStateOf(false) }
+
+    HomeContent(
+        onAddClick = { showAddSheet = true },
+        modifier = modifier,
+    )
+
+    if (showAddSheet) {
+        AddHabitSheet(
+            onDismiss = { showAddSheet = false },
+            onSave = { name, color, iconKey -> viewModel.addHabit(name, color, iconKey) },
+        )
+    }
+}
+
+@Composable
+private fun HomeContent(
+    onAddClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val completedToday = fakeHabits.count { it.isCompleted }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = {},
+                onClick = onAddClick,
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
                 text = { Text("New habit") },
             )
@@ -171,11 +209,11 @@ private fun PackStreakCard(
 @Preview(name = "Home · dark")
 @Composable
 private fun HomeScreenDarkPreview() {
-    StreakWolfTheme(darkTheme = true) { HomeScreen() }
+    StreakWolfTheme(darkTheme = true) { HomeContent(onAddClick = {}) }
 }
 
 @Preview(name = "Home · light")
 @Composable
 private fun HomeScreenLightPreview() {
-    StreakWolfTheme(darkTheme = false) { HomeScreen() }
+    StreakWolfTheme(darkTheme = false) { HomeContent(onAddClick = {}) }
 }
