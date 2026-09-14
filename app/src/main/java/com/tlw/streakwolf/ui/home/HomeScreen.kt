@@ -43,6 +43,8 @@ import com.tlw.streakwolf.ui.theme.headline
 import com.tlw.streakwolf.ui.theme.label
 import com.tlw.streakwolf.ui.theme.title
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 /**
  * Stateful half: owns the ViewModel and the add-sheet visibility, renders nothing itself.
@@ -71,6 +73,13 @@ fun HomeScreen(
         )
     }
 }
+
+/**
+ * Built once per composition rather than per recomposition — DateTimeFormatter is not
+ * cheap to construct, and the header rebuilds on every state emission.
+ */
+private val dateFormatter: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("EEE, d MMMM", Locale.getDefault())
 
 @Composable
 private fun HomeContent(
@@ -103,7 +112,7 @@ private fun HomeContent(
                     style = MaterialTheme.typography.headline,
                 )
                 Text(
-                    text = "Sat, 15 August",
+                    text = state.date.format(dateFormatter),
                     color = StreakWolfTheme.colors.onSurfaceMuted,
                     style = MaterialTheme.typography.caption,
                 )
@@ -133,7 +142,7 @@ private fun HomeContent(
 
                 is HomeUiState.Empty -> EmptyState(title = "", message = "")
 
-                HomeUiState.Loading -> HabitListSkeleton()
+                is HomeUiState.Loading -> HabitListSkeleton()
             }
             // Clears the FAB.
             Box(Modifier.size(56.dp))

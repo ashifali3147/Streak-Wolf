@@ -3,12 +3,19 @@ package com.tlw.streakwolf.ui.home
 import java.time.LocalDate
 
 sealed interface HomeUiState {
-    data object Loading : HomeUiState
+    /**
+     * The day the screen is showing. On the interface because the header renders it in
+     * every state — including [Loading], which is why that one isn't a `data object`.
+     * The clock belongs to the ViewModel, so even "loading" is loading *a* date.
+     */
+    val date: LocalDate
 
-    data class Empty(val date: LocalDate) : HomeUiState
+    data class Loading(override val date: LocalDate) : HomeUiState
+
+    data class Empty(override val date: LocalDate) : HomeUiState
 
     data class Content(
-        val date: LocalDate,
+        override val date: LocalDate,
         val habits: List<HabitUiModel>,
         val packStreak: Int,
         val bestPackStreak: Int,

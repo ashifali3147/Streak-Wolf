@@ -18,10 +18,17 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(private val repository: HabitRepository) : ViewModel() {
 
+    /**
+     * Read once, not per emission: calling LocalDate.now() inside the mapping would
+     * re-evaluate on every database change. Swap this for an injected Clock when the
+     * streak tests need to fake "today".
+     */
+    private val today: LocalDate = LocalDate.now()
+
     val uiState: StateFlow<HomeUiState> =
-        repository.getAllHabit().map { HomeUiState.Loading }.stateIn(
+        repository.getAllHabit().map { HomeUiState.Loading(today) }.stateIn(
             viewModelScope,
-            SharingStarted.WhileSubscribed(5_000), HomeUiState.Loading
+            SharingStarted.WhileSubscribed(5_000), HomeUiState.Loading(today)
         )
 
     /**
