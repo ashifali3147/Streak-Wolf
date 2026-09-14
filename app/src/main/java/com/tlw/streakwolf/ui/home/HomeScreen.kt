@@ -33,28 +33,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tlw.streakwolf.ui.addedit.AddHabitSheet
+import com.tlw.streakwolf.ui.components.EmptyState
 import com.tlw.streakwolf.ui.components.HabitCard
+import com.tlw.streakwolf.ui.components.HabitListSkeleton
 import com.tlw.streakwolf.ui.theme.HairlineWidth
 import com.tlw.streakwolf.ui.theme.StreakWolfTheme
 import com.tlw.streakwolf.ui.theme.caption
 import com.tlw.streakwolf.ui.theme.headline
 import com.tlw.streakwolf.ui.theme.label
 import com.tlw.streakwolf.ui.theme.title
-
-// Step 5 is static UI only. Step 6 replaces this with HomeUiState from HomeViewModel.
-private data class FakeHabit(
-    val name: String,
-    val currentStreak: Int,
-    val completionTrack: List<Boolean>,
-    val isCompleted: Boolean,
-)
-
-private val fakeHabits = listOf(
-    FakeHabit("Morning run", 23, listOf(true, true, true, true, true, false, true), true),
-    FakeHabit("Read 20 pages", 7, listOf(true, false, true, true, true, false, true), true),
-    FakeHabit("No screens after 10", 4, listOf(false, true, true, false, true, true, false), false),
-    FakeHabit("Stretch", 12, listOf(true, true, false, true, true, true, true), false),
-)
+import java.time.LocalDate
 
 /**
  * Stateful half: owns the ViewModel and the add-sheet visibility, renders nothing itself.
@@ -65,7 +53,6 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    // TODO(step 6): feed this into HomeContent and delete fakeHabits.
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Saveable so the sheet survives rotation and process death.
@@ -74,6 +61,7 @@ fun HomeScreen(
     HomeContent(
         onAddClick = { showAddSheet = true },
         modifier = modifier,
+        state = state
     )
 
     if (showAddSheet) {
@@ -88,8 +76,8 @@ fun HomeScreen(
 private fun HomeContent(
     onAddClick: () -> Unit,
     modifier: Modifier = Modifier,
+    state: HomeUiState
 ) {
-    val completedToday = fakeHabits.count { it.isCompleted }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -121,26 +109,32 @@ private fun HomeContent(
                 )
             }
 
-            PackStreakCard(
-                completedToday = completedToday,
-                totalHabits = fakeHabits.size,
-                packStreak = 18,
-                bestPackStreak = 41,
-            )
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                fakeHabits.forEach { habit ->
-                    HabitCard(
-                        name = habit.name,
-                        currentStreak = habit.currentStreak,
-                        completionTrack = habit.completionTrack,
-                        isCompleted = habit.isCompleted,
-                        onCompletedChange = {},
-                        modifier = Modifier.fillMaxWidth(),
+            when (state) {
+                is HomeUiState.Content -> {
+                    PackStreakCard(
+                        completedToday = state.habits.count { it.isCompletedToday },
+                        totalHabits = state.habits.size,
+                        packStreak = state.packStreak,
+                        bestPackStreak = state.bestPackStreak,
                     )
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        state.habits.forEach { habit ->
+                            HabitCard(
+                                name = habit.name,
+                                currentStreak = habit.currentStreak,
+                                completionTrack = habit.completionTrack,
+                                isCompleted = habit.isCompletedToday,
+                                onCompletedChange = {},
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
                 }
-            }
 
+                is HomeUiState.Empty -> EmptyState(title = "", message = "")
+
+                HomeUiState.Loading -> HabitListSkeleton()
+            }
             // Clears the FAB.
             Box(Modifier.size(56.dp))
         }
@@ -206,14 +200,29 @@ private fun PackStreakCard(
     }
 }
 
+private val previewState = HomeUiState.Content(
+    date = LocalDate.of(2026, 8, 15),
+    habits = listOf(
+        HabitUiModel(
+            1,
+            "Morning run",
+            23,
+            listOf(true, false, true, true, false, true, false),
+            true
+        ),
+    ),
+    packStreak = 18,
+    bestPackStreak = 41
+)
+
 @Preview(name = "Home · dark")
 @Composable
 private fun HomeScreenDarkPreview() {
-    StreakWolfTheme(darkTheme = true) { HomeContent(onAddClick = {}) }
+    StreakWolfTheme(darkTheme = true) { HomeContent(onAddClick = {}, state = previewState) }
 }
 
 @Preview(name = "Home · light")
 @Composable
 private fun HomeScreenLightPreview() {
-    StreakWolfTheme(darkTheme = false) { HomeContent(onAddClick = {}) }
+    StreakWolfTheme(darkTheme = false) { HomeContent(onAddClick = {}, state = previewState) }
 }
