@@ -26,4 +26,6 @@ interface HabitRepository {
     fun getCompletionsForHabit(habitId: Long): Flow<List<LocalDate>>
 
     fun getCompletionsOn(date: LocalDate): Flow<Set<Long>>
+
+    fun getCompletionsBetween(start: LocalDate, end: LocalDate): Flow<Map<Long, Set<LocalDate>>>
 }
