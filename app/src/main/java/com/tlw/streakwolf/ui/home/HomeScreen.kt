@@ -140,7 +140,7 @@ private fun HomeContent(
                     }
                 }
 
-                is HomeUiState.Empty -> EmptyState(title = "", message = "")
+                is HomeUiState.Empty -> EmptyState(title = "No habits yet", message = "Tap New habit to start your first streak.",)
 
                 is HomeUiState.Loading -> HabitListSkeleton()
             }

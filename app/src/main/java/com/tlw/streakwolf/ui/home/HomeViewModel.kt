@@ -26,10 +26,34 @@ class HomeViewModel @Inject constructor(private val repository: HabitRepository)
     private val today: LocalDate = LocalDate.now()
 
     val uiState: StateFlow<HomeUiState> =
-        repository.getAllHabit().map { HomeUiState.Loading(today) }.stateIn(
+        repository.getAllHabit().map { habits ->
+            if (habits.isEmpty()) {
+                HomeUiState.Empty(today)
+            } else {
+                // Streaks are 0 until the streak logic (step 7) lands.
+                HomeUiState.Content(
+                    date = today,
+                    habits = habits.map { it.toUiModel() },
+                    packStreak = 0,
+                    bestPackStreak = 0,
+                )
+            }
+        }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5_000), HomeUiState.Loading(today)
         )
+
+    /**
+     * Completion fields are placeholders: the habits flow alone can't answer them. They
+     * become real once completions are combined in for the check button.
+     */
+    private fun Habit.toUiModel() = HabitUiModel(
+        id = id,
+        name = name,
+        currentStreak = 0,
+        completionTrack = List(7) { false },
+        isCompletedToday = false,
+    )
 
     /**
      * Builds the habit from what the add sheet collects. `createdAt` and `sortOrder`
