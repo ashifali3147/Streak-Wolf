@@ -67,7 +67,7 @@ fun AddHabitSheet(
     onSave: (name: String, color: HabitColor, iconKey: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
     // Saveable, not just remembered: the sheet has to survive process death (spec step 10).
