@@ -8,8 +8,8 @@ import com.tlw.streakwolf.domain.repository.HabitRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -26,14 +26,19 @@ class HomeViewModel @Inject constructor(private val repository: HabitRepository)
     private val today: LocalDate = LocalDate.now()
 
     val uiState: StateFlow<HomeUiState> =
-        repository.getAllHabit().map { habits ->
+    // Combined, not just mapped: Room re-emits a flow only when *its* table changes,
+        // so toggling a completion never touches the habits flow on its own.
+        combine(
+            repository.getAllHabit(),
+            repository.getCompletionsOn(today),
+        ) { habits, completedIds ->
             if (habits.isEmpty()) {
                 HomeUiState.Empty(today)
             } else {
                 // Streaks are 0 until the streak logic (step 7) lands.
                 HomeUiState.Content(
                     date = today,
-                    habits = habits.map { it.toUiModel() },
+                    habits = habits.map { it.toUiModel(completedIds) },
                     packStreak = 0,
                     bestPackStreak = 0,
                 )
@@ -44,15 +49,15 @@ class HomeViewModel @Inject constructor(private val repository: HabitRepository)
         )
 
     /**
-     * Completion fields are placeholders: the habits flow alone can't answer them. They
-     * become real once completions are combined in for the check button.
+     * Streak and track are still placeholders: they need the completion history from
+     * getCompletionsBetween, which lands with the streak logic.
      */
-    private fun Habit.toUiModel() = HabitUiModel(
+    private fun Habit.toUiModel(completedToday: Set<Long>) = HabitUiModel(
         id = id,
         name = name,
         currentStreak = 0,
         completionTrack = List(7) { false },
-        isCompletedToday = false,
+        isCompletedToday = id in completedToday,
     )
 
     /**
