@@ -63,6 +63,7 @@ fun HomeScreen(
 
     HomeContent(
         onAddClick = { showAddSheet = true },
+        onCompletedChange = { id, value -> viewModel.toggleTodayHabit(id, value) },
         modifier = modifier,
         state = state
     )
@@ -85,6 +86,7 @@ private val dateFormatter: DateTimeFormatter =
 @Composable
 private fun HomeContent(
     onAddClick: () -> Unit,
+    onCompletedChange: (Long, Boolean) -> Unit,
     modifier: Modifier = Modifier,
     state: HomeUiState
 ) {
@@ -134,14 +136,19 @@ private fun HomeContent(
                                 currentStreak = habit.currentStreak,
                                 completionTrack = habit.completionTrack,
                                 isCompleted = habit.isCompletedToday,
-                                onCompletedChange = {},
+                                onCompletedChange = {
+                                    onCompletedChange(habit.id, it)
+                                },
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }
                     }
                 }
 
-                is HomeUiState.Empty -> EmptyState(title = "No habits yet", message = "Tap New habit to start your first streak.",)
+                is HomeUiState.Empty -> EmptyState(
+                    title = "No habits yet",
+                    message = "Tap New habit to start your first streak.",
+                )
 
                 is HomeUiState.Loading -> {
                     PackStreakCardSkeleton()
@@ -232,18 +239,34 @@ private val previewState = HomeUiState.Content(
 @Composable
 private fun HomeScreenLoadingPreview() {
     StreakWolfTheme(darkTheme = true) {
-        HomeContent(onAddClick = {}, state = HomeUiState.Loading(LocalDate.of(2026, 8, 15)))
+        HomeContent(
+            onAddClick = {},
+            onCompletedChange = { _, _ -> },
+            state = HomeUiState.Loading(LocalDate.of(2026, 8, 15))
+        )
     }
 }
 
 @Preview(name = "Home · dark")
 @Composable
 private fun HomeScreenDarkPreview() {
-    StreakWolfTheme(darkTheme = true) { HomeContent(onAddClick = {}, state = previewState) }
+    StreakWolfTheme(darkTheme = true) {
+        HomeContent(
+            onAddClick = {},
+            onCompletedChange = { _, _ -> },
+            state = previewState
+        )
+    }
 }
 
 @Preview(name = "Home · light")
 @Composable
 private fun HomeScreenLightPreview() {
-    StreakWolfTheme(darkTheme = false) { HomeContent(onAddClick = {}, state = previewState) }
+    StreakWolfTheme(darkTheme = false) {
+        HomeContent(
+            onAddClick = {},
+            onCompletedChange = { _, _ -> },
+            state = previewState
+        )
+    }
 }

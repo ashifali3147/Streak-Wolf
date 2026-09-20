@@ -96,4 +96,14 @@ class HomeViewModel @Inject constructor(private val repository: HabitRepository)
             repository.archiveHabit(id)
         }
     }
+
+    fun toggleTodayHabit(id: Long, value: Boolean) {
+        viewModelScope.launch {
+            if (value) {
+                repository.markHabitComplete(habitId = id, date = today)
+            } else {
+                repository.unMarkHabitComplete(habitId = id, date = today)
+            }
+        }
+    }
 }
