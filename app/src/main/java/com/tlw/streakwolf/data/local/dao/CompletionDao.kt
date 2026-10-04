@@ -34,4 +34,7 @@ interface CompletionDao {
 
     @Query("SELECT habitId FROM ${StreakWolfDatabase.COMPLETION_TABLE} WHERE date = (:date)")
     fun getHabitIdsCompletedOn(date: Long): Flow<List<Long>>
+
+    @Query("SELECT * FROM ${StreakWolfDatabase.COMPLETION_TABLE} WHERE date BETWEEN (:start) AND (:end)")
+    fun getCompletionsBetween(start: Long, end: Long): Flow<List<CompletionEntity>>
 }

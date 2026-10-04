@@ -3,8 +3,6 @@ package com.tlw.streakwolf.ui.theme
 import androidx.compose.ui.graphics.Color
 import com.tlw.streakwolf.domain.model.HabitColor
 
-private val FlameLight = Color(0xFFBA7517)
-private val FlameDark = Color(0xFFEF9F27)
 
 private val ClayLight = Color(0xFFB4453A)
 private val ClayDark = Color(0xFFE08476)

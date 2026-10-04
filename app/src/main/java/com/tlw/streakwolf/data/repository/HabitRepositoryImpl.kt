@@ -54,4 +54,15 @@ class HabitRepositoryImpl @Inject constructor(private val habitDao: HabitDao, pr
     override fun getCompletionsOn(date: LocalDate): Flow<Set<Long>> {
         return completionDao.getHabitIdsCompletedOn(date.toEpochDay()).map { it.toSet() }
     }
+
+    override fun getCompletionsBetween(
+        start: LocalDate,
+        end: LocalDate
+    ): Flow<Map<Long, Set<LocalDate>>> {
+        return completionDao.getCompletionsBetween(start.toEpochDay(), end.toEpochDay())
+            .map { entities ->
+                entities.groupBy { it.habitId }
+                    .mapValues { entry -> entry.value.map { it.toDomain().date }.toSet() }
+            }
+    }
 }
